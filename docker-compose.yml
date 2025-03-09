@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: discord-iftar-bot
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    volumes:
+      - ./logs:/app/logs
+
+  mongo:
+    image: mongo:latest
+    container_name: discord-iftar-bot-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
+
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+CMD ["npm", "start"]
